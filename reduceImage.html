@@ -1,0 +1,73 @@
+<!DOCTYPE>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>利用Canvas进行图片压缩</title>
+</head>
+
+<body>
+  <input type="file" id="uploadFile" name="uploadFile" onchange="getFileInfo()">
+
+  <script>
+    function getFileInfo() {
+      var files = document.getElementById('uploadFile').files,
+          reader = new FileReader(),
+          dataBase,                             // 上传文件base64字符
+          img = document.createElement('img'),
+          imgWidth,
+          imgHeight,
+          maxSize = 1,                          // 图片大小上限,1代表1MB
+          maxWidth = 1000,                      // 设置上传图片最大宽度跟高度
+          maxHeight = 1000;
+
+      reader.onload = function (e) {
+        console.log('=======未压缩图片的尺寸大小为：', e.target.result.length);
+
+        // 若图片大小超过上限，则进行压缩
+        if (maxSize * 1024 * 1024 < files[0].size) {
+          
+          // 获取上传图片的宽度和高度
+          img.src = e.target.result;
+          img.onload = function () {
+            imgWidth = this.width;
+            imgHeight = this.height;
+
+            if (imgWidth > maxWidth) {
+
+              dataBase = reduceImages(img, 'width', 'height', imgHeight, imgWidth);
+              console.log('=======压缩后的尺寸大小为：',dataBase.length);
+
+            } else if (imgHeight > maxHeight) {
+
+              dataBase = reduceImages(img, 'height', 'width', imgWidth, imgHeight);
+              console.log('=======压缩后的尺寸大小为：',dataBase.length)
+
+            }
+
+            // canvas压缩
+            function reduceImages(image, maxSize, minSize, count1, count2) {
+
+              var cc = document.createElement('canvas'),
+                    cctx = cc.getContext('2d');
+
+              cc[maxSize] = maxWidth;
+              cc[minSize] = count1 * maxWidth / count2;
+              cctx.drawImage(image, 0, 0, cc.width, cc.height);
+              return cc.toDataURL('image/jpeg', 0.8);
+            }
+
+          }
+
+        }else {
+          dataBase = e.target.result;
+        }
+      }
+
+      // 将文件转为base64
+      reader.readAsDataURL(files[0])
+    }
+  </script>
+</body>
+
+</html>
